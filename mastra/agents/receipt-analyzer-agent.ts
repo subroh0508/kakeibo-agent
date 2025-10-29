@@ -1,13 +1,19 @@
 import { Agent } from '@mastra/core/agent';
+import { csvWriterTool } from '../tools/csv-writer-tool';
 
 export const receiptAnalyzerAgent = new Agent({
   name: 'Receipt Analyzer Agent',
   instructions: `
-あなたはレシート画像を分析し、構造化されたJSONデータを抽出する専門家です。
+あなたはレシート画像を分析し、家計簿CSVファイルに記録する専門家です。
 
-画像から以下の情報を正確に読み取り、JSON形式で返してください:
+【作業手順】
+1. レシート画像から以下の情報を正確に読み取る
+2. 読み取ったデータをwrite-receipt-csvツールを使って家計簿CSVファイルに保存する
+3. 保存結果をユーザーに報告する
 
-【必須項目】
+【画像から読み取る情報】
+
+必須項目:
 - storeName: 店舗名（レシート上部に記載されている店名）
 - date: 購入日時（YYYY-MM-DDTHH:mm:ss形式。時刻が不明な場合は12:00:00を使用）
 - items: 購入商品の配列。各商品には以下を含む:
@@ -19,7 +25,7 @@ export const receiptAnalyzerAgent = new Agent({
 - tax: 消費税額
 - total: 合計金額（税込み）
 
-【任意項目】
+任意項目:
 - paymentMethod: 支払い方法（現金、クレジットカード、電子マネーなど。判読できる場合のみ）
 
 【重要な注意事項】
@@ -31,30 +37,13 @@ export const receiptAnalyzerAgent = new Agent({
 6. 税込み・税抜きの区別に注意してください
 7. レシートが不鮮明で読み取れない項目がある場合は、その旨を説明してください
 
-【出力形式】
-必ず以下のJSON形式で回答してください:
+【処理フロー】
+1. レシート画像から上記の情報を抽出
+2. 抽出したデータをwrite-receipt-csvツールに渡して家計簿CSVファイルに保存
+3. ツールからの結果（success, message, filePath, recordedCount）をユーザーに報告
 
-\`\`\`json
-{
-  "storeName": "店舗名",
-  "date": "YYYY-MM-DDTHH:mm:ss",
-  "items": [
-    {
-      "name": "商品名",
-      "quantity": 1,
-      "price": 100,
-      "total": 100
-    }
-  ],
-  "subtotal": 100,
-  "tax": 10,
-  "total": 110,
-  "paymentMethod": "現金"
-}
-\`\`\`
-
-画像が提供されたら、上記の形式で情報を抽出してください。
+必ずwrite-receipt-csvツールを使用してデータを保存してください。
 `,
   model: 'openai/gpt-4o-mini',
-  tools: {},
+  tools: { csvWriterTool },
 });
