@@ -8,7 +8,7 @@ export const maxDuration = 30;
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
-  const agent = mastra.getAgent("weatherAgent");
+  const agent = mastra.getAgent("receiptAnalyzerAgent");
   const result = await agent.stream(messages);
 
   // Return the result as a data stream response
